@@ -18,6 +18,7 @@
             <div id="decisionTree" class="mb-4">
                 <!-- Las preguntas y respuestas se mostrarán aquí -->
             </div>
+            <button id="retroceder" class="btn btn-warning">Retroceder</button>
             <button id="reiniciar" class="btn btn-secondary">Reiniciar</button>
             <button id="agregarPregunta" class="btn btn-primary">Agregar Pregunta</button>
         </div>
@@ -54,26 +55,61 @@
                             <label for="resultado2" class="form-label">Resultado 2</label>
                             <input type="text" class="form-control" id="resultado2" required>
                         </div>
+                        <div class="mb-3">
+                            <label for="preguntaPadre" class="form-label">¿De qué pregunta depende?</label>
+                            <select class="form-control" id="preguntaPadre">
+                                <!-- Las opciones se generarán dinámicamente -->
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="opcionPadre" class="form-label">Elige la respuesta que llevará a la nueva
+                                pregunta</label>
+                            <select class="form-control" id="opcionPadre">
+                                <option value="0">Opción 1</option>
+                                <option value="1">Opción 2</option>
+                            </select>
+                        </div>
                         <button type="submit" class="btn btn-primary">Guardar Pregunta</button>
                     </form>
                 </div>
+            </div>
+        </div>
+    </div>
 
-                <div class="mb-3">
-                    <label for="preguntaPadre" class="form-label">¿De qué pregunta depende?</label>
-                    <select class="form-control" id="preguntaPadre">
-                        <!-- Las opciones se generarán dinámicamente -->
-                    </select>
+    <!-- Modal para editar preguntas -->
+    <div class="modal fade" id="modalEditarPregunta" tabindex="-1" aria-labelledby="modalEditarPreguntaLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalEditarPreguntaLabel">Editar Pregunta</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-
-                <div class="mb-3">
-                    <label for="opcionPadre" class="form-label">Elige la respuesta que llevará a la nueva
-                        pregunta</label>
-                    <select class="form-control" id="opcionPadre">
-                        <option value="0">Opción 1</option>
-                        <option value="1">Opción 2</option>
-                    </select>
+                <div class="modal-body">
+                    <form id="formEditarPregunta">
+                        <div class="mb-3">
+                            <label for="editarPregunta" class="form-label">Pregunta</label>
+                            <input type="text" class="form-control" id="editarPregunta" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editarRespuesta1" class="form-label">Respuesta 1</label>
+                            <input type="text" class="form-control" id="editarRespuesta1" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editarResultado1" class="form-label">Resultado 1</label>
+                            <input type="text" class="form-control" id="editarResultado1" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editarRespuesta2" class="form-label">Respuesta 2</label>
+                            <input type="text" class="form-control" id="editarRespuesta2" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editarResultado2" class="form-label">Resultado 2</label>
+                            <input type="text" class="form-control" id="editarResultado2" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                    </form>
                 </div>
-
             </div>
         </div>
     </div>
