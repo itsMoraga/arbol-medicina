@@ -3,11 +3,11 @@ document.addEventListener("DOMContentLoaded", function () {
     const reiniciarBtn = document.getElementById("reiniciar");
     const agregarPreguntaBtn = document.getElementById("agregarPregunta");
     const retrocederBtn = document.getElementById("retroceder");
+    const arbolEstructura = document.getElementById("arbolEstructura");
 
-    let historial = []; // Historial para retroceder entre preguntas
-    let preguntaEnEdicion = null; // Para rastrear qué pregunta estamos editando
+    let historial = [];
+    let preguntaEnEdicion = null;
 
-    // Árbol de decisiones con preguntas predeterminadas
     let preguntas = JSON.parse(localStorage.getItem("arbolDecisiones")) || [
         {
             pregunta: "¿Tienes fiebre?",
@@ -36,12 +36,37 @@ document.addEventListener("DOMContentLoaded", function () {
                 { respuesta: "Sí", siguiente: "Podría ser un resfriado" },
                 { respuesta: "No", siguiente: "No parece ser un resfriado" }
             ]
+        },
+        {
+            pregunta: "¿Tienes dificultad para respirar?",
+            opciones: [
+                { respuesta: "Sí", siguiente: "Podría ser un síntoma de asma o COVID-19. Consulta a un médico." },
+                { respuesta: "No", siguiente: 4 }
+            ]
+        },
+        {
+            pregunta: "¿Tienes dolor en el pecho?",
+            opciones: [
+                { respuesta: "Sí", siguiente: "Podría ser un síntoma grave. Consulta a un médico de inmediato." },
+                { respuesta: "No", siguiente: 5 }
+            ]
+        },
+        {
+            pregunta: "¿Tienes fatiga o cansancio excesivo?",
+            opciones: [
+                { respuesta: "Sí", siguiente: "Podría ser un síntoma de anemia o falta de sueño." },
+                { respuesta: "No", siguiente: 6 }
+            ]
+        },
+        {
+            pregunta: "¿Tienes náuseas o vómitos?",
+            opciones: [
+                { respuesta: "Sí", siguiente: "Podría ser un síntoma de intoxicación alimentaria o infección estomacal." },
+                { respuesta: "No", siguiente: "Consulta a un médico si los síntomas persisten." }
+            ]
         }
     ];
 
-    let posicionActual = 0;
-
-    // Función para mostrar las preguntas
     function mostrarPregunta(index) {
         decisionTree.innerHTML = "";
         const preguntaActual = preguntas[index];
@@ -57,11 +82,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
             botonRespuesta.addEventListener("click", function () {
                 if (typeof opcion.siguiente === "string") {
-                    historial.push(index); // Guardar la posición antes de ir al nodo final
+                    historial.push(index);
                     mostrarResultado(opcion.siguiente);
                 } else {
-                    historial.push(index); // Guardar la posición actual antes de avanzar
-                    posicionActual = opcion.siguiente;
+                    historial.push(index);
                     mostrarPregunta(opcion.siguiente);
                 }
             });
@@ -69,119 +93,100 @@ document.addEventListener("DOMContentLoaded", function () {
             decisionTree.appendChild(botonRespuesta);
         });
 
-        // Botón para editar la pregunta actual
-        const botonEditar = document.createElement("button");
-        botonEditar.classList.add("btn", "btn-warning", "m-2");
-        botonEditar.textContent = "Editar Pregunta";
-        botonEditar.addEventListener("click", function () {
-            editarPregunta(index);
-        });
-        decisionTree.appendChild(botonEditar);
-
-        // Botón para eliminar la pregunta actual
-        const botonEliminar = document.createElement("button");
-        botonEliminar.classList.add("btn", "btn-danger", "m-2");
-        botonEliminar.textContent = "Eliminar Pregunta";
-        botonEliminar.addEventListener("click", function () {
-            eliminarPregunta(index);
-        });
-        decisionTree.appendChild(botonEliminar);
-
-        // Botón para agregar un nuevo nodo con opciones "Sí" o "No"
-        const botonAgregarNodo = document.createElement("button");
-        botonAgregarNodo.classList.add("btn", "btn-info", "m-2");
-        botonAgregarNodo.textContent = "Agregar Nodo con Sí/No";
-        botonAgregarNodo.addEventListener("click", function () {
-            agregarNodoIntermedio(index);
-        });
-        decisionTree.appendChild(botonAgregarNodo);
-
-        // Botón para agregar un nodo final (diagnóstico)
-        const botonAgregarNodoFinal = document.createElement("button");
-        botonAgregarNodoFinal.classList.add("btn", "btn-success", "m-2");
-        botonAgregarNodoFinal.textContent = "Agregar Nodo Final";
-        botonAgregarNodoFinal.addEventListener("click", function () {
-            agregarNodoFinal(index);
-        });
-        decisionTree.appendChild(botonAgregarNodoFinal);
+        renderizarArbol();
     }
 
-    // Función para mostrar el resultado final (nodo final)
     function mostrarResultado(resultado) {
         decisionTree.innerHTML = `<h4>${resultado}</h4>`;
+        renderizarArbol();
     }
 
-    // Función para editar una pregunta
-    function editarPregunta(index) {
-        preguntaEnEdicion = index;
-        const preguntaActual = preguntas[index];
+    function renderizarArbol() {
+        arbolEstructura.innerHTML = "";
 
-        document.getElementById("editarPregunta").value = preguntaActual.pregunta;
-        document.getElementById("editarRespuesta1").value = preguntaActual.opciones[0].respuesta;
-        document.getElementById("editarResultado1").value = preguntaActual.opciones[0].siguiente;
-        document.getElementById("editarRespuesta2").value = preguntaActual.opciones[1].respuesta;
-        document.getElementById("editarResultado2").value = preguntaActual.opciones[1].siguiente;
+        const tabla = document.createElement("table");
+        const thead = document.createElement("thead");
+        const tbody = document.createElement("tbody");
 
-        const modalEditarPregunta = new bootstrap.Modal(document.getElementById('modalEditarPregunta'));
-        modalEditarPregunta.show();
+        thead.innerHTML = `
+            <tr>
+                <th>Pregunta</th>
+                <th>Respuesta 1</th>
+                <th>Resultado 1</th>
+                <th>Respuesta 2</th>
+                <th>Resultado 2</th>
+                <th>Acciones</th>
+            </tr>
+        `;
+
+        preguntas.forEach((pregunta, index) => {
+            const fila = document.createElement("tr");
+
+            fila.innerHTML = `
+                <td>${pregunta.pregunta}</td>
+                <td>${pregunta.opciones[0].respuesta}</td>
+                <td>${pregunta.opciones[0].siguiente}</td>
+                <td>${pregunta.opciones[1].respuesta}</td>
+                <td>${pregunta.opciones[1].siguiente}</td>
+            `;
+
+            const botonesDiv = document.createElement("td");
+
+            const botonAgregarNodo = document.createElement("button");
+            botonAgregarNodo.classList.add("btn", "btn-info", "m-1");
+            botonAgregarNodo.textContent = "Agregar Nodo con Sí/No";
+            botonAgregarNodo.addEventListener("click", function () {
+                agregarNodoIntermedio(index);
+            });
+
+            const botonAgregarNodoFinal = document.createElement("button");
+            botonAgregarNodoFinal.classList.add("btn", "btn-success", "m-1");
+            botonAgregarNodoFinal.textContent = "Agregar Nodo Final";
+            botonAgregarNodoFinal.addEventListener("click", function () {
+                agregarNodoFinal(index);
+            });
+
+            const botonEliminar = document.createElement("button");
+            botonEliminar.classList.add("btn", "btn-danger", "m-1");
+            botonEliminar.textContent = "Eliminar Pregunta";
+            botonEliminar.addEventListener("click", function () {
+                eliminarPregunta(index);
+            });
+
+            botonesDiv.appendChild(botonAgregarNodo);
+            botonesDiv.appendChild(botonAgregarNodoFinal);
+            botonesDiv.appendChild(botonEliminar);
+
+            fila.appendChild(botonesDiv);
+            tbody.appendChild(fila);
+        });
+
+        tabla.appendChild(thead);
+        tabla.appendChild(tbody);
+        arbolEstructura.appendChild(tabla);
     }
 
-    // Función para guardar los cambios de la edición
-    document.getElementById("formEditarPregunta").addEventListener("submit", function (e) {
-        e.preventDefault();
+    mostrarPregunta(0);
 
-        const nuevaPregunta = document.getElementById("editarPregunta").value;
-        const respuesta1 = document.getElementById("editarRespuesta1").value;
-        const resultado1 = document.getElementById("editarResultado1").value;
-        const respuesta2 = document.getElementById("editarRespuesta2").value;
-        const resultado2 = document.getElementById("editarResultado2").value;
-
-        preguntas[preguntaEnEdicion] = {
-            pregunta: nuevaPregunta,
-            opciones: [
-                { respuesta: respuesta1, siguiente: resultado1 },
-                { respuesta: respuesta2, siguiente: resultado2 }
-            ]
-        };
-
-        guardarArbol();
-
-        const modalEditarPregunta = bootstrap.Modal.getInstance(document.getElementById('modalEditarPregunta'));
-        modalEditarPregunta.hide();
-
-        mostrarPregunta(preguntaEnEdicion); // Actualizar la visualización
-    });
-
-    // Función para eliminar una pregunta
-    function eliminarPregunta(index) {
-        preguntas.splice(index, 1);
-        guardarArbol();
-        mostrarPregunta(0);
-    }
-
-    // Función para retroceder una pregunta
     retrocederBtn.addEventListener("click", function () {
         if (historial.length > 0) {
-            const preguntaAnterior = historial.pop(); // Retrocede a la última pregunta guardada en el historial
+            const preguntaAnterior = historial.pop();
             mostrarPregunta(preguntaAnterior);
         } else {
             alert("No hay más preguntas para retroceder.");
         }
     });
 
-    // Función para agregar un nuevo nodo intermedio con opciones "Sí" y "No"
     function agregarNodoIntermedio(index) {
         const nuevaPregunta = prompt("Introduce la nueva pregunta:");
         if (!nuevaPregunta) return;
 
-        // Preguntar si el nodo se debe agregar después de "Sí" o después de "No"
         const opcionElegida = prompt('¿Agregar el nodo después de "Sí" o "No"? (Escribe "Sí" o "No")');
         if (opcionElegida !== "Sí" && opcionElegida !== "No") {
             alert("Por favor escribe 'Sí' o 'No'.");
             return;
         }
 
-        // Crear el nuevo nodo con las opciones Sí y No
         const nuevaEntrada = {
             pregunta: nuevaPregunta,
             opciones: [
@@ -193,7 +198,6 @@ document.addEventListener("DOMContentLoaded", function () {
         preguntas.push(nuevaEntrada);
         const nuevaPreguntaIndex = preguntas.length - 1;
 
-        // Asociar el nuevo nodo con la respuesta elegida (Sí o No)
         if (opcionElegida === "Sí") {
             preguntas[index].opciones[0].siguiente = nuevaPreguntaIndex;
         } else if (opcionElegida === "No") {
@@ -204,19 +208,16 @@ document.addEventListener("DOMContentLoaded", function () {
         mostrarPregunta(index);
     }
 
-    // Función para agregar un nodo final a la pregunta actual
     function agregarNodoFinal(index) {
         const resultadoFinal = prompt("Introduce el diagnóstico final:");
         if (!resultadoFinal) return;
 
-        // Preguntar si el nodo final se debe agregar después de "Sí" o después de "No"
         const opcionElegida = prompt('¿Agregar el nodo final después de "Sí" o "No"? (Escribe "Sí" o "No")');
         if (opcionElegida !== "Sí" && opcionElegida !== "No") {
             alert("Por favor escribe 'Sí' o 'No'.");
             return;
         }
 
-        // Asociar el resultado final con la respuesta elegida (Sí o No)
         if (opcionElegida === "Sí") {
             preguntas[index].opciones[0].siguiente = resultadoFinal;
         } else if (opcionElegida === "No") {
@@ -227,17 +228,20 @@ document.addEventListener("DOMContentLoaded", function () {
         mostrarPregunta(index);
     }
 
-    // Función para guardar el árbol de decisiones en el localStorage
+    function eliminarPregunta(index) {
+        preguntas.splice(index, 1);
+        guardarArbol();
+        mostrarPregunta(0);
+    }
+
     function guardarArbol() {
         localStorage.setItem("arbolDecisiones", JSON.stringify(preguntas));
     }
 
-    // Reiniciar el árbol de decisiones
     reiniciarBtn.addEventListener("click", function () {
         historial = [];
         mostrarPregunta(0);
     });
 
-    // Mostrar la primera pregunta al iniciar
     mostrarPregunta(0);
 });
